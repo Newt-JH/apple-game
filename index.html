@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Game</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #ffeb99;
+            border-bottom: 2px solid #e0c45c;
+            height: 60px;
+            box-sizing: border-box;
+        }
+
+        .header-left,
+        .header-center,
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-button {
+            margin-right: 8px;
+            font-size: 20px;
+            padding: 4px 8px;
+            border: none;
+            background: #fff3cd;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .header-button:last-child {
+            margin-right: 0;
+        }
+
+        .timer,
+        .score {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .board {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding-top: 0px;
+            padding-bottom: 8px;
+            align-items: center;
+            justify-content: center;
+            height: calc(100dvh - 60px);
+            margin-top: 8px;
+            background-color: #f4e5a0;
+            touch-action: none;
+        }
+
+        .board-row {
+            display: flex;
+            padding: 0;
+            margin: 0;
+        }
+
+        .cell {
+            width: calc((100vw - 12px) / 7);
+            height: calc((100vw - 12px) / 7);
+            background-image: url('./public/apple.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 8px;
+            margin: 0;
+            user-select: none;
+        }
+
+        .cell.selected {
+            outline: 3px solid #ff4d4d;
+            box-shadow: 0 0 0 2px white inset;
+        }
+
+        .cell.empty {
+            opacity: 0.3;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            text-align: center;
+        }
+
+        .restart-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            background-color: #ffd966;
+            color: #333;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        const BOARD_WIDTH = 7;
+        const BOARD_HEIGHT = 10;
+        let score = 0;
+        let time = 20;
+        let isTimeOver = false;
+        let timer;
+        let boardData = [];
+        let selectedCells = new Set();
+        let startCell = null;
+
+        const root = document.getElementById('root');
+
+        function generateRandomBoard() {
+            return Array.from({ length: BOARD_HEIGHT }, () =>
+                Array.from({ length: BOARD_WIDTH }, () => Math.floor(Math.random() * 9) + 1)
+            );
+        }
+
+        function render() {
+            root.innerHTML = `
+                <div style="position: relative;">
+                    <div class="game-header">
+                        <div class="header-left">
+                            <button class="header-button">↩</button>
+                            <button class="header-button" id="restart-btn">🔄</button>
+                        </div>
+                        <div class="header-center">
+                            <span class="timer">Time: ${time}</span>
+                        </div>
+                        <div class="header-right">
+                            <span class="score">Score: ${score}</span>
+                        </div>
+                    </div>
+                    <div class="board">
+                        ${boardData.map((row, rowIndex) => `
+                            <div class="board-row">
+                                ${row.map((value, colIndex) => `
+                                    <div class="cell ${selectedCells.has(`${rowIndex}-${colIndex}`) ? 'selected' : ''} ${value === 0 ? 'empty' : ''}" data-row="${rowIndex}" data-col="${colIndex}">
+                                        ${value !== 0 ? value : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${isTimeOver ? `
+                        <div class="modal-overlay">
+                            <div class="modal-content">
+                                <div>⏰ 시간이 종료되었습니다!</div>
+                                <div style="margin: 10px 0">최종 점수: ${score}</div>
+                                <button class="restart-button" id="modal-restart-btn">다시 시작하기</button>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('restart-btn').addEventListener('click', handleRestart);
+            if (isTimeOver) {
+                document.getElementById('modal-restart-btn').addEventListener('click', handleRestart);
+            }
+
+            const board = document.querySelector('.board');
+            board.addEventListener('touchstart', handleTouchStart);
+            board.addEventListener('touchmove', handleTouchMove);
+            board.addEventListener('touchend', handleTouchEnd);
+        }
+
+        function getCellFromTouch(touch) {
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (!target || !target.classList.contains('cell')) return null;
+
+            const { row, col } = target.dataset;
+            return { row: parseInt(row, 10), col: parseInt(col, 10) };
+        }
+
+        function handleTouchStart(e) {
+            if (isTimeOver) return;
+            const cell = getCellFromTouch(e.touches[0]);
+            if (!cell) return;
+            startCell = cell;
+            selectedCells = new Set([`${cell.row}-${cell.col}`]);
+            render();
+        }
+
+        function handleTouchMove(e) {
+            if (isTimeOver) return;
+            if (!startCell) return;
+            const current = getCellFromTouch(e.touches[0]);
+            if (!current) return;
+
+            const rowMin = Math.min(startCell.row, current.row);
+            const rowMax = Math.max(startCell.row, current.row);
+            const colMin = Math.min(startCell.col, current.col);
+            const colMax = Math.max(startCell.col, current.col);
+
+            const newSelected = new Set();
+            for (let r = rowMin; r <= rowMax; r++) {
+                for (let c = colMin; c <= colMax; c++) {
+                    newSelected.add(`${r}-${c}`);
+                }
+            }
+            selectedCells = newSelected;
+            render();
+        }
+
+        function handleTouchEnd() {
+            if (isTimeOver) return;
+            if (selectedCells.size === 0) return;
+
+            let sum = 0;
+            selectedCells.forEach(key => {
+                const [row, col] = key.split('-').map(Number);
+                sum += boardData[row][col];
+            });
+
+            if (sum === 10 && selectedCells.size >= 3) {
+                selectedCells.forEach(key => {
+                    const [row, col] = key.split('-').map(Number);
+                    boardData[row][col] = 0;
+                });
+                score += selectedCells.size;
+            }
+
+            selectedCells = new Set();
+            startCell = null;
+            render();
+        }
+
+        function handleRestart() {
+            score = 0;
+            time = 20;
+            isTimeOver = false;
+            boardData = generateRandomBoard();
+            clearInterval(timer);
+            startTimer();
+            render();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                time--;
+                if (time <= 0) {
+                    time = 0;
+                    isTimeOver = true;
+                    clearInterval(timer);
+                }
+                render();
+            }, 1000);
+        }
+
+        // Initial setup
+        boardData = generateRandomBoard();
+        startTimer();
+        render();
+
+    </script>
+</body>
+</html>

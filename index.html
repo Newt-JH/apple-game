@@ -58,12 +58,11 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
-            padding-top: 0px;
-            padding-bottom: 8px;
+            padding: 20px 0 40px; /* 상단 20px, 하단 40px 여백 추가 */
             align-items: center;
             justify-content: center;
-            height: calc(100dvh - 60px);
-            margin-top: 8px;
+            height: calc(100dvh - 60px); /* 헤더 높이만큼 빼기 */
+            box-sizing: border-box; /* 패딩을 높이에 포함 */
             background-color: #f4e5a0;
             touch-action: none;
         }
@@ -75,19 +74,20 @@
         }
 
         .cell {
-            width: min(calc((100vw - 12px) / 7), calc((100dvh - 60px - 10px) / 10));
-            height: min(calc((100vw - 12px) / 7), calc((100dvh - 60px - 10px) / 10));
+            /* 화면 너비 기준 9칸, 화면 높이 기준 12칸 + 여백 고려 */
+            width: min(calc((100vw - 16px) / 9), calc((100dvh - 60px - 60px) / 12));
+            height: min(calc((100vw - 16px) / 9), calc((100dvh - 60px - 60px) / 12));
             background-image: url('./public/apple.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            font-size: 1.5rem;
+            font-size: 1.2rem; /* 폰트 크기 조정 */
             font-weight: bold;
             color: white;
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            padding-bottom: 8px;
+            padding-bottom: 4px; /* 패딩 조정 */
             margin: 0;
             user-select: none;
         }
@@ -138,8 +138,8 @@
     <div id="root"></div>
 
     <script>
-        const BOARD_WIDTH = 7;
-        const BOARD_HEIGHT = 10;
+        const BOARD_WIDTH = 9; /* 가로 9칸 */
+        const BOARD_HEIGHT = 12; /* 세로 12칸 */
         let score = 0;
         let time = 20;
         let isTimeOver = false;

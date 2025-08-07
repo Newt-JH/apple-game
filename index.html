@@ -6,13 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apple Game</title>
     <style>
-        body {
+        html, body {
+            height: 100%;
             margin: 0;
+            overflow: hidden; /* 스크롤 막기 */
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
                 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
                 sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            background-color: #f4e5a0; /* 배경색을 body로 이동 */
+        }
+
+        #root, .game-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .game-header {
@@ -24,6 +33,7 @@
             border-bottom: 2px solid #e0c45c;
             height: 60px;
             box-sizing: border-box;
+            flex-shrink: 0; /* 헤더 높이 고정 */
         }
 
         .header-left,
@@ -55,40 +65,40 @@
         }
 
         .board {
+            flex-grow: 1; /* 남은 공간을 모두 차지 */
             display: flex;
             flex-direction: column;
             gap: 2px;
-            padding: 20px 0 40px; /* 상단 20px, 하단 40px 여백 추가 */
+            padding: 10px 4px 20px; /* 상하좌우 여백 조정 */
             align-items: center;
             justify-content: center;
-            height: calc(100dvh - 60px); /* 헤더 높이만큼 빼기 */
-            box-sizing: border-box; /* 패딩을 높이에 포함 */
-            background-color: #f4e5a0;
+            box-sizing: border-box;
             touch-action: none;
+            overflow: hidden; /* 내부 스크롤도 방지 */
         }
 
         .board-row {
             display: flex;
-            padding: 0;
-            margin: 0;
+            justify-content: center;
+            gap: 2px;
         }
 
         .cell {
-            /* 화면 너비 기준 9칸, 화면 높이 기준 12칸 + 여백 고려 */
-            width: min(calc((100vw - 16px) / 9), calc((100dvh - 60px - 60px) / 12));
-            height: min(calc((100vw - 16px) / 9), calc((100dvh - 60px - 60px) / 12));
+            /* 셀 크기를 변수로 관리 (JS에서 설정) */
+            width: var(--cell-size);
+            height: var(--cell-size);
             background-image: url('./public/apple.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            font-size: 1.2rem; /* 폰트 크기 조정 */
+            font-size: var(--font-size);
             font-weight: bold;
             color: white;
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            padding-bottom: 4px; /* 패딩 조정 */
-            margin: 0;
+            padding-bottom: var(--cell-padding);
+            box-sizing: border-box;
             user-select: none;
         }
 
@@ -150,6 +160,23 @@
 
         const root = document.getElementById('root');
 
+        function setCellSize() {
+            const board = document.querySelector('.board');
+            if (!board) return;
+
+            const boardWidth = board.clientWidth - 8; // padding left/right
+            const boardHeight = board.clientHeight - 30; // padding top/bottom
+
+            const cellWidth = (boardWidth - (BOARD_WIDTH - 1) * 2) / BOARD_WIDTH;
+            const cellHeight = (boardHeight - (BOARD_HEIGHT - 1) * 2) / BOARD_HEIGHT;
+
+            const size = Math.floor(Math.min(cellWidth, cellHeight));
+
+            document.documentElement.style.setProperty('--cell-size', `${size}px`);
+            document.documentElement.style.setProperty('--font-size', `${size * 0.5}px`);
+            document.documentElement.style.setProperty('--cell-padding', `${size * 0.1}px`);
+        }
+
         function generateRandomBoard() {
             return Array.from({ length: BOARD_HEIGHT }, () =>
                 Array.from({ length: BOARD_WIDTH }, () => Math.floor(Math.random() * 9) + 1)
@@ -158,7 +185,7 @@
 
         function render() {
             root.innerHTML = `
-                <div style="position: relative;">
+                <div class="game-container">
                     <div class="game-header">
                         <div class="header-left">
                             <button class="header-button">↩</button>
@@ -194,14 +221,16 @@
                 </div>
             `;
 
+            setCellSize(); // Re-calculate cell size on each render
+
             document.getElementById('restart-btn').addEventListener('click', handleRestart);
             if (isTimeOver) {
                 document.getElementById('modal-restart-btn').addEventListener('click', handleRestart);
             }
 
             const board = document.querySelector('.board');
-            board.addEventListener('touchstart', handleTouchStart);
-            board.addEventListener('touchmove', handleTouchMove);
+            board.addEventListener('touchstart', handleTouchStart, { passive: false });
+            board.addEventListener('touchmove', handleTouchMove, { passive: false });
             board.addEventListener('touchend', handleTouchEnd);
         }
 
@@ -290,8 +319,10 @@
 
         // Initial setup
         boardData = generateRandomBoard();
-        startTimer();
         render();
+        startTimer();
+
+        window.addEventListener('resize', setCellSize);
 
     </script>
 </body>

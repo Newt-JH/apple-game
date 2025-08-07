@@ -1,0 +1,53 @@
+.board {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 0px;
+    padding-bottom: 8px;
+    align-items: center;
+    justify-content: center;
+  
+    height: calc(100dvh - 60px); /* ✅ 헤더 높이 뺌 */
+    margin-top: 8px;             /* ✅ 위로 살짝 당김 */
+    background-color: #f4e5a0;
+    touch-action: none;
+  }
+  
+  
+  .board-row {
+    display: flex;
+    padding: 0;        /* ✅ 위아래 간격 제거 */
+    margin: 0;         /* ✅ 기본 마진 제거 */
+  }
+  
+  .cell {
+    width: calc((100vw - 12px) / 7);    /* 현재 7칸이니 7로 나눔 */
+    height: calc((100vw - 12px) / 7);
+    background-image: url('../../public/apple.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+  
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  
+    padding-bottom: 8px;   /* ✅ 숫자 살짝 아래 */
+    margin: 0;             /* ✅ 셀 간 마진 제거 */
+    user-select: none;
+  }
+  
+  /* 🔲 드래그 선택 효과 */
+  .cell.selected {
+    outline: 3px solid #ff4d4d;
+    box-shadow: 0 0 0 2px white inset;
+  }
+  
+  .cell.empty {
+    opacity: 0.3;
+  }
+  

@@ -1,53 +1,61 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f4e5a0;
+}
+
+.game-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .board {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding-top: 0px;
-    padding-bottom: 8px;
-    align-items: center;
-    justify-content: center;
-  
-    height: calc(100dvh - 60px); /* ✅ 헤더 높이 뺌 */
-    margin-top: 8px;             /* ✅ 위로 살짝 당김 */
-    background-color: #f4e5a0;
-    touch-action: none;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 4px 20px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  touch-action: none;
+  overflow: hidden;
+}
+
+.board-row {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+.board.locked {
+  pointer-events: none;
+}
+
+.falling-apple-clone {
+  position: absolute;
+  background-image: url('../../public/apple.png');
+  background-size: cover;
+  background-position: center;
+  z-index: 99;
+  pointer-events: none;
+  animation: apple-fall 1.2s ease-in forwards;
+}
+
+@keyframes apple-fall {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
   }
-  
-  
-  .board-row {
-    display: flex;
-    padding: 0;        /* ✅ 위아래 간격 제거 */
-    margin: 0;         /* ✅ 기본 마진 제거 */
+  100% {
+    transform: translateY(100vh) scale(0.8);
+    opacity: 0;
   }
-  
-  .cell {
-    width: calc((100vw - 12px) / 7);    /* 현재 7칸이니 7로 나눔 */
-    height: calc((100vw - 12px) / 7);
-    background-image: url('../../public/apple.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-  
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-  
-    padding-bottom: 8px;   /* ✅ 숫자 살짝 아래 */
-    margin: 0;             /* ✅ 셀 간 마진 제거 */
-    user-select: none;
-  }
-  
-  /* 🔲 드래그 선택 효과 */
-  .cell.selected {
-    outline: 3px solid #ff4d4d;
-    box-shadow: 0 0 0 2px white inset;
-  }
-  
-  .cell.empty {
-    opacity: 0.3;
-  }
-  
+}

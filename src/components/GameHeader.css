@@ -1,39 +1,39 @@
 .game-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    background-color: #ffeb99;
-    border-bottom: 2px solid #e0c45c;
-    height: 60px;
-    box-sizing: border-box;
-  }
-  
-  .header-left,
-  .header-center,
-  .header-right {
-    display: flex;
-    align-items: center;
-  }
-  
-  .header-button {
-    margin-right: 8px;
-    font-size: 20px;
-    padding: 4px 8px;
-    border: none;
-    background: #fff3cd;
-    border-radius: 6px;
-    cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  }
-  
-  .header-button:last-child {
-    margin-right: 0;
-  }
-  
-  .timer,
-  .score {
-    font-size: 18px;
-    font-weight: bold;
-  }
-  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #ffeb99;
+  border-bottom: 2px solid #e0c45c;
+  height: 60px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.header-left,
+.header-center,
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-button {
+  margin-right: 8px;
+  font-size: 20px;
+  padding: 4px 8px;
+  border: none;
+  background: #fff3cd;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.header-button:last-child {
+  margin-right: 0;
+}
+
+.timer,
+.score {
+  font-size: 18px;
+  font-weight: bold;
+}
